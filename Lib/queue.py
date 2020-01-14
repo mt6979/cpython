@@ -197,6 +197,21 @@ class Queue:
         '''
         return self.get(block=False)
 
+    def push(self, item):
+        '''Push an item into queue.
+        
+        If the queue is full, drop the oldest ,and push item into the queue.
+        If the queue is not full, push item into the queue.
+        '''
+        with self.mutex:
+            if 0 < self.maxsize <= self._qsize():
+                item = self._get()
+                return item
+            else:
+                self._put(item)
+                self.unfinished_tasks += 1
+                self.not_empty.notify()
+
     # Override these methods to implement other queue organizations
     # (e.g. stack or priority queue).
     # These will only be called with appropriate locks held
